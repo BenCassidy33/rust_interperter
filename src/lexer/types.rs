@@ -1,3 +1,6 @@
+use lazy_static::lazy_static;
+use std::collections::HashMap;
+
 #[derive(Debug, PartialEq)]
 pub struct Lexer {
     pub input: String,
@@ -12,7 +15,7 @@ pub struct Token {
     pub literal: String,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TokenType {
     ILLEGAL,
     EOF,
@@ -43,4 +46,22 @@ pub enum TokenType {
     RPAREN,
     LBRACE,
     RBRACE,
+    LBRACKET,
+    RBRACKET,
+
+    UNKNOWN,
+}
+
+lazy_static! {
+    pub static ref IDENTS: HashMap<&'static str, TokenType> = {
+        let mut map = HashMap::new();
+        map.insert("let", TokenType::LET);
+        map.insert("fn", TokenType::FUNCTION);
+        map.insert("if", TokenType::IF);
+        map.insert("else", TokenType::ELSE);
+        map.insert("return", TokenType::RETURN);
+        map.insert("true", TokenType::TRUE);
+        map.insert("false", TokenType::FALSE);
+        map
+    };
 }

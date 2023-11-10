@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod lexer {
     use rust_interperter::lexer::{
-        lex::{self, LexerOps},
+        lex::LexerOps,
         types::{Lexer, Token, TokenType},
     };
     #[test]
@@ -33,38 +33,27 @@ mod lexer {
     }
 
     #[test]
-    fn next_token() {
-        let expected = Token {
-            token_type: TokenType::LET,
-            literal: "let".to_string(),
-        };
+    fn test_next_token() {
+        let input = r#"
+            let five = 5;
+            let ten = 10;
+            let add = fn(x, y) {
+                x + y;
+            };
+            let res = add(five, ten);
+        "#;
 
-        let tok = Lexer::tokenize("let".to_string());
+        let lex = Lexer::new(input.to_string());
+        let toks: Vec<Token> = Vec::new();
 
-        assert_eq!(tok, expected);
-    }
-
-    #[test]
-    fn tokenize() {
-        let expected = Token {
-            token_type: TokenType::INT(5),
-            literal: "5".to_string(),
-        };
-
-        let test = Lexer::tokenize("5".to_string());
-        assert_eq!(test, expected);
-    }
-
-    #[test]
-    fn all_tokens() {
         let expected: Vec<Token> = vec![
             Token {
                 token_type: TokenType::LET,
                 literal: "let".to_string(),
             },
             Token {
-                token_type: TokenType::IDENT("x".to_string()),
-                literal: "x".to_string(),
+                token_type: TokenType::IDENT("five".to_string()),
+                literal: "five".to_string(),
             },
             Token {
                 token_type: TokenType::ASSIGN,
@@ -78,11 +67,64 @@ mod lexer {
                 token_type: TokenType::SEMICOLON,
                 literal: ";".to_string(),
             },
+            Token {
+                token_type: TokenType::LET,
+                literal: "let".to_string(),
+            },
+            Token {
+                token_type: TokenType::IDENT("ten".to_string()),
+                literal: "ten".to_string(),
+            },
+            Token {
+                token_type: TokenType::ASSIGN,
+                literal: "=".to_string(),
+            },
+            Token {
+                token_type: TokenType::INT(10),
+                literal: "10".to_string(),
+            },
+            Token {
+                token_type: TokenType::SEMICOLON,
+                literal: ";".to_string(),
+            },
+            Token {
+                token_type: TokenType::LET,
+                literal: "let".to_string(),
+            },
+            Token {
+                token_type: TokenType::IDENT("add".to_string()),
+                literal: "add".to_string(),
+            },
+            Token {
+                token_type: TokenType::ASSIGN,
+                literal: "=".to_string(),
+            },
+            Token {
+                token_type: TokenType::FUNCTION,
+                literal: "fn".to_string(),
+            },
+            Token {
+                token_type: TokenType::LPAREN,
+                literal: "(".to_string(),
+            },
+            Token {
+                token_type: TokenType::IDENT("x".to_string()),
+                literal: "x".to_string(),
+            },
+            Token {
+                token_type: TokenType::COMMA,
+                literal: ",".to_string(),
+            },
+            Token {
+                token_type: TokenType::IDENT("y".to_string()),
+                literal: "y".to_string(),
+            },
+            Token {
+                token_type: TokenType::SEMICOLON,
+                literal: ";".to_string(),
+            },
         ];
 
-        let mut lex = Lexer::new("let x = 5;".to_string());
-        let res = lex.all_tokens();
-
-        assert_eq!(res, expected);
+        assert_eq!(lex.next_token(), expected);
     }
 }

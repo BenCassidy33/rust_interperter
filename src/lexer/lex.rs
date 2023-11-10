@@ -1,12 +1,11 @@
-use std::{iter::Skip, ops::Index};
-
-use super::types::{Lexer, Token, TokenType};
+use super::types::{Lexer, Token, TokenType, IDENTS};
 
 pub trait LexerOps {
     fn new(input: String) -> Self;
     fn next_char(&mut self);
-    fn tokenize(tok: String) -> Token;
-    fn all_tokens(&mut self) -> Vec<Token>;
+    fn next_token(&mut self) -> Token;
+    fn read_indent(&mut self) -> String;
+    fn ident_lookup(ident: String) -> TokenType;
 }
 
 impl LexerOps for Lexer {
@@ -33,78 +32,97 @@ impl LexerOps for Lexer {
         }
     }
 
-    fn tokenize(tok: String) -> Token {
-        println!("{:#?}", tok);
+    fn next_token(&mut self) -> Token {
+        let token: Token = match char::from_u32(self.ch).unwrap().to_string().as_str() {
+            "=" => Token {
+                token_type: TokenType::ASSIGN,
+                literal: "=".to_string(),
+            },
+            ";" => Token {
+                token_type: TokenType::SEMICOLON,
+                literal: ";".to_string(),
+            },
+            "(" => Token {
+                token_type: TokenType::LPAREN,
+                literal: "(".to_string(),
+            },
+            ")" => Token {
+                token_type: TokenType::RPAREN,
+                literal: ")".to_string(),
+            },
+            "{" => Token {
+                token_type: TokenType::LBRACE,
+                literal: "{".to_string(),
+            },
+            "}" => Token {
+                token_type: TokenType::RBRACE,
+                literal: "}".to_string(),
+            },
+            "[" => Token {
+                token_type: TokenType::LBRACKET,
+                literal: "[".to_string(),
+            },
+            "]" => Token {
+                token_type: TokenType::RBRACKET,
+                literal: "]".to_string(),
+            },
+            "+" => Token {
+                token_type: TokenType::PLUS,
+                literal: "+".to_string(),
+            },
+            "," => Token {
+                token_type: TokenType::COMMA,
+                literal: ",".to_string(),
+            },
+            "<" => Token {
+                token_type: TokenType::LT,
+                literal: "<".to_string(),
+            },
+            ">" => Token {
+                token_type: TokenType::GT,
+                literal: ">".to_string(),
+            },
+            "" => Token {
+                token_type: TokenType::EOF,
+                literal: "".to_string(),
+            },
 
-        let token = match tok.as_str() {
-            "\n" | "" => TokenType::EOF,
-            "let" => TokenType::LET,
-            "fn" => TokenType::FUNCTION,
-            "=" => TokenType::ASSIGN,
-            ";" => TokenType::SEMICOLON,
-            "(" => TokenType::LPAREN,
-            ")" => TokenType::RPAREN,
-            "{" => TokenType::LBRACE,
-            "}" => TokenType::RBRACE,
-            "+" => TokenType::PLUS,
-            "," => TokenType::COMMA,
-            "if" => TokenType::IF,
-            "else" => TokenType::ELSE,
-            "<" => TokenType::LT,
-            ">" => TokenType::GT,
-            "<=" => TokenType::LTEQ,
-            ">=" => TokenType::GTEQ,
-            "true" => TokenType::TRUE,
-            "false" => TokenType::FALSE,
-            "return" => TokenType::RETURN,
-            _ => {
-                if let Ok(itok) = tok.parse::<isize>() {
-                    TokenType::INT(itok)
+            ch => {
+                if ch.chars().into_iter().collect::<Vec<char>>().len() > 1 {
+                    panic!("Something went wrong checking for char");
+                } else if ch.chars().into_iter().nth(0).unwrap().is_ascii_alphabetic() {
+                    Token {
+                        token_type: Lexer::ident_lookup(ch.to_string()),
+                        literal: self.read_indent(),
+                    }
                 } else {
-                    TokenType::IDENT(tok.clone())
+                    Token {
+                        token_type: TokenType::ILLEGAL,
+                        literal: ch.to_string(),
+                    }
                 }
             }
         };
 
-        Token {
-            token_type: token,
-            literal: tok,
-        }
+        self.next_char();
+
+        token
     }
 
-    fn all_tokens(&mut self) -> Vec<Token> {
-        let mut char_toks: Vec<char> = Vec::new();
-        let mut tokens: Vec<Token> = Vec::new();
-        let mut token: Vec<String> = Vec::new();
+    fn read_indent(&mut self) -> String {
+        let pos = self.ch_pos;
 
-        while self.ch != 0 {
-            let char = char::from_u32(self.ch).unwrap();
-            char_toks.push(char);
+        while char::from_u32(self.ch).unwrap().is_ascii_alphabetic()
+            || char::from_u32(self.ch).unwrap() == '_'
+            || char::from_u32(self.ch).unwrap() == '!'
+        {
             self.next_char();
         }
 
-        char_toks.push(char::from_u32(self.ch).unwrap());
+        self.input[pos as usize..=self.ch_pos as usize].to_string()
+    }
 
-        println!("{:#?}", char_toks);
-
-        for idx in 0..char_toks.len() {
-            if char_toks[idx].is_ascii_whitespace() || idx == char_toks.len() - 1 {
-                let tok = token.join("");
-
-                if tok.ends_with(";") {
-                    let (tok1, tok2) = tok.split_at(tok.len() - 1);
-                    tokens.push(Lexer::tokenize(tok1.to_string()));
-                    tokens.push(Lexer::tokenize(tok2.to_string()));
-                    token.clear();
-                } else {
-                    tokens.push(Lexer::tokenize(token.join("")));
-                    token.clear();
-                }
-            } else {
-                token.push(char_toks[idx].to_string());
-            }
-        }
-
-        tokens
+    fn ident_lookup(ident: String) -> TokenType {
+        IDENTS.get(ident.as_str()).unwrap().clone()
     }
 }
