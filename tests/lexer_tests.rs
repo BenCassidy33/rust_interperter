@@ -119,6 +119,10 @@ mod lexer {
                 literal: "y".to_string(),
             },
             Token {
+                token_type: TokenType::RPAREN,
+                literal: ")".to_string(),
+            },
+            Token {
                 token_type: TokenType::SEMICOLON,
                 literal: ";".to_string(),
             },
@@ -126,7 +130,16 @@ mod lexer {
 
         for expected_token in expected.iter() {
             let actual = lex.next_token();
-            assert_eq!(*expected_token, actual);
+
+            println!(
+                "Expected: {:?}, Actual: {:?} \n ===============================================================================================",
+                expected_token, actual
+            );
+            assert_eq!(
+                *expected_token, actual,
+                "\n\nExpected: {:?}, \nGot: {:?} \n\n",
+                *expected_token, actual
+            );
         }
     }
 }

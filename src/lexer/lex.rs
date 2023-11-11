@@ -8,7 +8,7 @@ pub trait LexerOps {
     fn ident_lookup(ident: String) -> TokenType;
     fn eat_whitespace(&mut self);
     fn read_number(&mut self) -> String;
-    fn peek_char(&self) -> Result<String, ()>;
+    fn peek_char(&self) -> Result<char, ()>;
 }
 
 impl LexerOps for Lexer {
@@ -93,6 +93,7 @@ impl LexerOps for Lexer {
             },
 
             ch => {
+                println!("{}", ch);
                 if ch.chars().into_iter().collect::<Vec<char>>().len() > 1 {
                     panic!("Something went wrong checking for char");
                 } else if ch.chars().into_iter().nth(0).unwrap().is_ascii_alphabetic() {
@@ -102,9 +103,10 @@ impl LexerOps for Lexer {
                         token_type: Lexer::ident_lookup(lit),
                     }
                 } else if ch.parse::<isize>().is_ok() {
+                    let val = self.read_number();
                     Token {
-                        token_type: TokenType::INT(ch.parse::<isize>().unwrap()),
-                        literal: format!("{}", ch),
+                        token_type: TokenType::INT(val.parse::<isize>().unwrap()),
+                        literal: val.to_string(),
                     }
                 } else {
                     Token {
@@ -120,9 +122,26 @@ impl LexerOps for Lexer {
         token
     }
 
-    fn read_number(&mut self) -> String {}
+    fn read_number(&mut self) -> String {
+        let pos = self.ch_pos;
 
-    fn peek_char(&self) -> Result<String, ()> {
+        while self
+            .input
+            .split("")
+            .collect::<Vec<&str>>()
+            .into_iter()
+            .nth(self.next_ch_pos as usize + 1)
+            .unwrap()
+            .parse::<isize>()
+            .is_ok()
+        {
+            self.next_char();
+        }
+
+        self.input[pos as usize..self.ch_pos as usize + 1].to_string()
+    }
+
+    fn peek_char(&self) -> Result<char, ()> {
         if self.next_ch_pos as usize >= self.input.len() {
             return Err(());
         } else {
@@ -134,7 +153,9 @@ impl LexerOps for Lexer {
                 .into_iter()
                 .nth(self.next_ch_pos as usize - 1)
                 .unwrap()
-                .to_string())
+                .chars()
+                .nth(0)
+                .unwrap())
         }
     }
 
