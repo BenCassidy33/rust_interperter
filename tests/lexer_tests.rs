@@ -43,8 +43,7 @@ mod lexer {
             let res = add(five, ten);
         "#;
 
-        let lex = Lexer::new(input.to_string());
-        let toks: Vec<Token> = Vec::new();
+        let mut lex = Lexer::new(input.to_string());
 
         let expected: Vec<Token> = vec![
             Token {
@@ -125,6 +124,9 @@ mod lexer {
             },
         ];
 
-        assert_eq!(lex.next_token(), expected);
+        for expected_token in expected.iter() {
+            let actual = lex.next_token();
+            assert_eq!(*expected_token, actual);
+        }
     }
 }

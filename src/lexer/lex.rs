@@ -6,6 +6,9 @@ pub trait LexerOps {
     fn next_token(&mut self) -> Token;
     fn read_indent(&mut self) -> String;
     fn ident_lookup(ident: String) -> TokenType;
+    fn eat_whitespace(&mut self);
+    fn read_number(&mut self) -> String;
+    fn peek_char(&self) -> Result<String, ()>;
 }
 
 impl LexerOps for Lexer {
@@ -33,6 +36,8 @@ impl LexerOps for Lexer {
     }
 
     fn next_token(&mut self) -> Token {
+        self.eat_whitespace();
+
         let token: Token = match char::from_u32(self.ch).unwrap().to_string().as_str() {
             "=" => Token {
                 token_type: TokenType::ASSIGN,
@@ -91,9 +96,15 @@ impl LexerOps for Lexer {
                 if ch.chars().into_iter().collect::<Vec<char>>().len() > 1 {
                     panic!("Something went wrong checking for char");
                 } else if ch.chars().into_iter().nth(0).unwrap().is_ascii_alphabetic() {
+                    let lit = self.read_indent();
                     Token {
-                        token_type: Lexer::ident_lookup(ch.to_string()),
-                        literal: self.read_indent(),
+                        literal: lit.clone(),
+                        token_type: Lexer::ident_lookup(lit),
+                    }
+                } else if ch.parse::<isize>().is_ok() {
+                    Token {
+                        token_type: TokenType::INT(ch.parse::<isize>().unwrap()),
+                        literal: format!("{}", ch),
                     }
                 } else {
                     Token {
@@ -109,6 +120,24 @@ impl LexerOps for Lexer {
         token
     }
 
+    fn read_number(&mut self) -> String {}
+
+    fn peek_char(&self) -> Result<String, ()> {
+        if self.next_ch_pos as usize >= self.input.len() {
+            return Err(());
+        } else {
+            Ok(self
+                .input
+                .clone()
+                .split("")
+                .collect::<Vec<&str>>()
+                .into_iter()
+                .nth(self.next_ch_pos as usize - 1)
+                .unwrap()
+                .to_string())
+        }
+    }
+
     fn read_indent(&mut self) -> String {
         let pos = self.ch_pos;
 
@@ -118,11 +147,19 @@ impl LexerOps for Lexer {
         {
             self.next_char();
         }
-
-        self.input[pos as usize..=self.ch_pos as usize].to_string()
+        self.input[pos as usize..self.ch_pos as usize].to_string()
     }
 
     fn ident_lookup(ident: String) -> TokenType {
-        IDENTS.get(ident.as_str()).unwrap().clone()
+        return match IDENTS.get(ident.as_str()) {
+            Some(ident) => ident.clone(),
+            None => TokenType::IDENT(ident),
+        };
+    }
+
+    fn eat_whitespace(&mut self) {
+        while char::from_u32(self.ch).unwrap().is_ascii_whitespace() {
+            self.next_char()
+        }
     }
 }
