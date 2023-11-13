@@ -123,8 +123,76 @@ mod lexer {
                 literal: ")".to_string(),
             },
             Token {
+                token_type: TokenType::LBRACE,
+                literal: "{".to_string(),
+            },
+            Token {
+                token_type: TokenType::IDENT("x".to_string()),
+                literal: "x".to_string(),
+            },
+            Token {
+                token_type: TokenType::PLUS,
+                literal: "+".to_string(),
+            },
+            Token {
+                token_type: TokenType::IDENT("y".to_string()),
+                literal: "y".to_string(),
+            },
+            Token {
                 token_type: TokenType::SEMICOLON,
                 literal: ";".to_string(),
+            },
+            Token {
+                token_type: TokenType::RBRACE,
+                literal: "}".to_string(),
+            },
+            Token {
+                token_type: TokenType::SEMICOLON,
+                literal: ";".to_string(),
+            },
+            Token {
+                token_type: TokenType::LET,
+                literal: "let".to_string(),
+            },
+            Token {
+                token_type: TokenType::IDENT("res".to_string()),
+                literal: "res".to_string(),
+            },
+            Token {
+                token_type: TokenType::ASSIGN,
+                literal: "=".to_string(),
+            },
+            Token {
+                token_type: TokenType::IDENT("add".to_string()),
+                literal: "add".to_string(),
+            },
+            Token {
+                token_type: TokenType::LPAREN,
+                literal: "(".to_string(),
+            },
+            Token {
+                token_type: TokenType::IDENT("five".to_string()),
+                literal: "five".to_string(),
+            },
+            Token {
+                token_type: TokenType::COMMA,
+                literal: ",".to_string(),
+            },
+            Token {
+                token_type: TokenType::IDENT("ten".to_string()),
+                literal: "ten".to_string(),
+            },
+            Token {
+                token_type: TokenType::RPAREN,
+                literal: ")".to_string(),
+            },
+            Token {
+                token_type: TokenType::SEMICOLON,
+                literal: ";".to_string(),
+            },
+            Token {
+                token_type: TokenType::EOF,
+                literal: "".to_string(),
             },
         ];
 

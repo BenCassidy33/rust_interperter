@@ -4,7 +4,7 @@ pub trait LexerOps {
     fn new(input: String) -> Self;
     fn next_char(&mut self);
     fn next_token(&mut self) -> Token;
-    fn read_indent(&mut self) -> String;
+    fn read_ident(&mut self) -> String;
     fn ident_lookup(ident: String) -> TokenType;
     fn eat_whitespace(&mut self);
     fn read_number(&mut self) -> String;
@@ -87,17 +87,32 @@ impl LexerOps for Lexer {
                 token_type: TokenType::GT,
                 literal: ">".to_string(),
             },
+            "!" => Token {
+                token_type: TokenType::BANG,
+                literal: "!".to_string(),
+            },
+            "-" => Token {
+                token_type: TokenType::MINUS,
+                literal: "-".to_string(),
+            },
+            "/" => Token {
+                token_type: TokenType::SLASH,
+                literal: "/".to_string(),
+            },
+            "*" => Token {
+                token_type: TokenType::ASTERISK,
+                literal: "*".to_string(),
+            },
             "" => Token {
                 token_type: TokenType::EOF,
                 literal: "".to_string(),
             },
 
             ch => {
-                println!("{}", ch);
                 if ch.chars().into_iter().collect::<Vec<char>>().len() > 1 {
-                    panic!("Something went wrong checking for char");
+                    panic!();
                 } else if ch.chars().into_iter().nth(0).unwrap().is_ascii_alphabetic() {
-                    let lit = self.read_indent();
+                    let lit = self.read_ident();
                     Token {
                         literal: lit.clone(),
                         token_type: Lexer::ident_lookup(lit),
@@ -116,8 +131,9 @@ impl LexerOps for Lexer {
                 }
             }
         };
-
+        println!("Before: {:?}", char::from_u32(self.ch).unwrap());
         self.next_char();
+        println!("After: {:?}", char::from_u32(self.ch).unwrap());
 
         token
     }
@@ -159,7 +175,7 @@ impl LexerOps for Lexer {
         }
     }
 
-    fn read_indent(&mut self) -> String {
+    fn read_ident(&mut self) -> String {
         let pos = self.ch_pos;
 
         while char::from_u32(self.ch).unwrap().is_ascii_alphabetic()
